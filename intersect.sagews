@@ -9,7 +9,11 @@ def intersect(seg1,seg2):
         #if slope between a point on seg1 and a point on seg2 is same as m1,
         #then all four points are on same line. Then just need to check they overlap.
         if (a[1]-d[1])*(b[0]-c[0])==(b[1]-c[1])*(a[0]-d[0]) and min(a[0],b[0])<=max(c[0],d[0]) and max(a[0],b[0])>=min(c[0],d[0]):
-            return (True,(max(min(a[0],b[0]),min(c[0],d[0])),max(min(a[1],b[1]),min(c[1],d[1]))))
+            e=max(min(a[0],b[0]),min(c[0],d[0]))
+            f=min(max(a[0],b[0]),max(c[0],d[0]))
+            g=max(min(a[1],b[1]),min(c[1],d[1]))
+            h=min(max(a[1],b[1]),max(c[1],d[1]))
+            return (True,[(e,g),(f,h)])
         else:
             return (False,None)
     t=var('t')
@@ -20,7 +24,8 @@ def intersect(seg1,seg2):
     if 0<=t<=1 and 0<=s<=1:
         return (True,(t*a[0]+(1-t)*b[0],t*a[1]+(1-t)*b[1]))
     else:
-        return False
+        return (False,None)
+
 #intersect(((0,0),(1,1)),((1,0),(0,1)))
 #intersect(((0,0),(0,1)),((1,0),(1,1)))
 #intersect(((0,0),(2/3,2/3)),((1/2,1/2),(1,1)))
