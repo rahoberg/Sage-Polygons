@@ -10,11 +10,11 @@ def intersect(seg1,seg2):
         #then all four points are on same line. Then just need to check they overlap.
         if (a[1]-d[1])*(b[0]-d[0])==(b[1]-d[1])*(a[0]-d[0]) and min(a[0],b[0])<=max(c[0],d[0]) and max(a[0],b[0])>=min(c[0],d[0]):
             return (True,None)
-            e=max(min(a[0],b[0]),min(c[0],d[0]))
-            f=min(max(a[0],b[0]),max(c[0],d[0]))
-            g=max(min(a[1],b[1]),min(c[1],d[1]))
-            h=min(max(a[1],b[1]),max(c[1],d[1]))
-            return (True,[(e,g),(f,h)])
+            #e=max(min(a[0],b[0]),min(c[0],d[0]))
+            #f=min(max(a[0],b[0]),max(c[0],d[0]))
+            #g=max(min(a[1],b[1]),min(c[1],d[1]))
+            #h=min(max(a[1],b[1]),max(c[1],d[1]))
+            #return (True,[(e,g),(f,h)])
         else:
             return (False,None)
     t=var('t')
