@@ -45,7 +45,7 @@ def Colinear(segments):
         if m1==m2:
             polygon.append(segments[k][0])
             polygon.append(segments[k+1][1])
-            k+=4
+            k+=3
         else:
             polygon.append(segments[k][0])
             polygon.append(segments[k][1])
