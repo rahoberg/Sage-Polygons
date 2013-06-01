@@ -16,7 +16,7 @@ class polygon_set(object):
     def area(self):
         area = 0
         for polygon in self.corners:
-            for i in range(length(polygon)):
+            for i in range(length(polygon)-1):
                 area += polygon[i-1][0]*polygon[i][1] - polygon[i-1][1]*polygon[i][1]
         return(area/2)
 
