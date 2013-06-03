@@ -40,6 +40,91 @@ class polygon_set(object):
     def union(self, other):
 
         pass
+        
+    def intersect(self, B):
+        corners_A = self.corners
+        corners_B = B.corners
+        edges_A = self.edges
+        edges_B = B.edges
+        
+        pointsA = []
+            for i in range(len(edges_A)):
+                pointsA += corners_A[i] + B.intersections_with(edges_A[i])
+            pointsA += corners_A[-1]
+        line_segA = []
+            for i in range(len(pointsA)-1):
+                line_segA += [(pointsA[i],pointsA[i+1])]
+        pointsB = []
+            for i in range(len(edges_B)):
+                pointsB += corners_B[i] + self.intersections_with(edges_B[i])
+            pointsB += corners_B[-1]
+        line_segB = []
+            for i in range(len(pointsB)-1):
+                line_segB += [(pointsB[i],pointsB[i+1])]
+                
+        A_inner_segs = []
+        inner_seg = []
+        previous_state = False
+        for i in range(len(line_segA)):
+            current_state = B.contains_line(line_segA[i])
+            if (!previous_state & !current_state):
+            elif (!previous_state & current_state):
+                inner_seg += [pointsA[i],pointsA[i+1]]
+            elif (previous_state & current_state):
+                inner_seg += [pointsA[i+1]]
+            elif (previous_state & !current_state):
+                A_inner_segs += inner_seg
+                inner_seg = []
+            previous_state = current_state
+        if (len(inner_seg) == 0 | len(A_inner_segs) == 0):
+            A_inner_segs += inner_seg
+        elif(A_inner_segs[0][0] == inner_seg[-1]):
+            A_inner_segs[0] += inner_seg
+        else:
+            A_inner_segs += inner_seg
+            
+        B_inner_segs = []
+        inner_seg = []
+        previous_state = False
+        for i in range(len(line_segB)):
+            current_state = self.contains_line(line_segB[i])
+            if (!previous_state & !current_state):
+            elif (!previous_state & current_state):
+                inner_seg += [pointsB[i],pointsB[i+1]]
+            elif (previous_state & current_state):
+                inner_seg += [pointsB[i+1]]
+            elif (previous_state & !current_state):
+                B_inner_segs += inner_seg
+                inner_seg = []
+            previous_state = current_state
+        if (len(inner_seg) == 0 | len(B_inner_segs) == 0):
+            B_inner_segs += inner_seg
+        elif(B_inner_segs[0][0] == inner_seg[-1]):
+            B_inner_segs[0] += inner_seg
+        else:
+            B_inner_segs += inner_seg
+        
+        
+        new_poly = []
+        for Aseg in A_inner_segs:
+            while(Aseg[0] != Aseg[-1]):
+                for(Bseg in B_inner_segs):
+                    if(Bseg[0] == Aseg[-1]):
+                        Aseg += Bseg[1:]
+                for(Aseg2 in A_inner_segs):
+                    if(Aseg2[0] == Aseg[-1]):
+                        Aseg += Aseg2[1:]
+            new_poly += Aseg
+        for Bseg in B_inner_segs:
+            while(Bseg[0] != Bseg[-1]):
+                for(Aseg in A_inner_segs):
+                    if(Aseg[0] == Bseg[-1]):
+                        Bseg += Aseg[1:]
+                for(Bseg2 in B_inner_segs):
+                    if(Bseg2[0] == Bseg[-1]):
+                        Bseg += Bseg2[1:]
+            new_poly += Bseg
+        return(polygon_set(set(new_poly)))
 
     def set_difference(self, other):
         pass
