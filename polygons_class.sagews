@@ -15,9 +15,11 @@ class polygon_set(object):
         return edges
 
     def graph(self,figsize=4,fill=False,axes=False,rgbcolor=(0,0,1),thickness=None,aspect_ration=1.0,legend_label=None,**options):
-        p=polygon2d(self.corners[0],fill=fill,axes=axes,figsize=figsize)
+        p=polygon2d(self.corners[0],fill=fill,axes=axes,figsize=figsize,rgbcolor=(0,0,1))
+        i=0
         for vertices in self.corners[1:]:
-            p+=polygon2d(vertices,fill=fill,axes=axes,figsize=figsize)
+            p+=polygon2d(vertices,fill=fill,axes=axes,figsize=figsize,rgbcolor=(i+1%2,0,i%2))
+            i+=1
         show(p)
     
     def split_graph(self,figsize=3,axes=False,fill=False):
