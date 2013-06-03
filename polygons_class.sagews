@@ -1,8 +1,9 @@
+
 class polygon_set(object):
 
     def __init__(self,array):
-        self.corners = set_corners(array)
-        self.edges = set_edges(self.corners)
+        self.corners = self.set_corners(array)
+        #self.edges = self.set_edges(self.corners)
 
     def set_edges(self,array):
         #returns an array of arrays of edges for each sub polygon
@@ -29,7 +30,7 @@ class polygon_set(object):
             if array[k]==array[(k+1)%length]:
                 k+=1
             else:
-                vertices.append(points[k])
+                vertices.append(array[k])
                 k+=1
         length=len(vertices)
         if length<3:
@@ -57,7 +58,7 @@ class polygon_set(object):
             else:
                 corners.append(vertices[k])
                 k+=1
-        return corners
+        return [corners]
 
     def area(self):
         area = 0
@@ -75,13 +76,13 @@ class polygon_set(object):
     def union(self, other):
 
         pass
-        
+
     def intersect(self, B):
         corners_A = self.corners
         corners_B = B.corners
         edges_A = self.edges
         edges_B = B.edges
-        
+
         pointsA = []
         for i in range(len(edges_A)):
             pointsA += corners_A[i] + B.intersections_with(edges_A[i])
@@ -96,66 +97,68 @@ class polygon_set(object):
         line_segB = []
         for i in range(len(pointsB)-1):
             line_segB += [(pointsB[i],pointsB[i+1])]
-                
+
         A_inner_segs = []
         inner_seg = []
         previous_state = False
         for i in range(len(line_segA)):
             current_state = B.contains_line(line_segA[i])
-            if (!previous_state & !current_state):
-            elif (!previous_state & current_state):
+            if not previous_state and not current_state:
+                pass
+            elif not previous_state and current_state:
                 inner_seg += [pointsA[i],pointsA[i+1]]
-            elif (previous_state & current_state):
+            elif previous_state and current_state:
                 inner_seg += [pointsA[i+1]]
-            elif (previous_state & !current_state):
+            elif previous_state and not current_state:
                 A_inner_segs += inner_seg
                 inner_seg = []
             previous_state = current_state
-        if (len(inner_seg) == 0 | len(A_inner_segs) == 0):
+        if len(inner_seg) == 0 | len(A_inner_segs) == 0:
             A_inner_segs += inner_seg
-        elif(A_inner_segs[0][0] == inner_seg[-1]):
+        elif A_inner_segs[0][0] == inner_seg[-1]:
             A_inner_segs[0] += inner_seg
         else:
             A_inner_segs += inner_seg
-            
+
         B_inner_segs = []
         inner_seg = []
         previous_state = False
         for i in range(len(line_segB)):
             current_state = self.contains_line(line_segB[i])
-            if (!previous_state & !current_state):
-            elif (!previous_state & current_state):
+            if not previous_state and not current_state:
+                pass
+            elif not previous_state and current_state:
                 inner_seg += [pointsB[i],pointsB[i+1]]
-            elif (previous_state & current_state):
+            elif previous_state and current_state:
                 inner_seg += [pointsB[i+1]]
-            elif (previous_state & !current_state):
+            elif previous_state and not current_state:
                 B_inner_segs += inner_seg
                 inner_seg = []
             previous_state = current_state
-        if (len(inner_seg) == 0 | len(B_inner_segs) == 0):
+        if len(inner_seg) == 0 | len(B_inner_segs) == 0:
             B_inner_segs += inner_seg
-        elif(B_inner_segs[0][0] == inner_seg[-1]):
+        elif B_inner_segs[0][0] == inner_seg[-1]:
             B_inner_segs[0] += inner_seg
         else:
             B_inner_segs += inner_seg
-        
-        
+
+
         new_poly = []
         for Aseg in A_inner_segs:
-            while(Aseg[0] != Aseg[-1]):
-                for(Bseg in B_inner_segs):
-                    if(Bseg[0] == Aseg[-1]):
+            while Aseg[0] != Aseg[-1]:
+                for Bseg in B_inner_segs:
+                    if Bseg[0] == Aseg[-1]:
                         Aseg += Bseg[1:]
-                for(Aseg2 in A_inner_segs):
-                    if(Aseg2[0] == Aseg[-1]):
+                for Aseg2 in A_inner_segs:
+                    if Aseg2[0] == Aseg[-1]:
                         Aseg += Aseg2[1:]
             new_poly += Aseg
         for Bseg in B_inner_segs:
             while(Bseg[0] != Bseg[-1]):
-                for(Aseg in A_inner_segs):
+                for Aseg in A_inner_segs:
                     if(Aseg[0] == Bseg[-1]):
                         Bseg += Aseg[1:]
-                for(Bseg2 in B_inner_segs):
+                for Bseg2 in B_inner_segs:
                     if(Bseg2[0] == Bseg[-1]):
                         Bseg += Bseg2[1:]
             new_poly += Bseg
@@ -188,18 +191,18 @@ class polygon_set(object):
                     else:
                         points += intersect(seg,edge)[1]
              #orders the points
-             if (seg[0][0] < seg[1][0]):
-                 #order by increasing x
-                 points.sort(key=lambda tup: tup[0])
-             elif (seg[0][0] < seg[1][0]):
-                 #order by decreasing x
-                 points.sort(key=lambda tup: -tup[0])
-             elif (seg[0][1] < seg[1][1]):
-                 #order by increasing y
-                 points.sort(key=lambda tup: tup[1])
-             elif (seg[0][1] > seg[1][1]):
-                 #order by decreasing y
-                 points.sort(key=lambda tup: -tup[1])
+            if seg[0][0] < seg[1][0]:
+                #order by increasing x
+                points.sort(key=lambda tup: tup[0])
+            elif seg[0][0] < seg[1][0]:
+                #order by decreasing x
+                points.sort(key=lambda tup: -tup[0])
+            elif seg[0][1] < seg[1][1]:
+                #order by increasing y
+                points.sort(key=lambda tup: tup[1])
+            elif seg[0][1] > seg[1][1]:
+                #order by decreasing y
+                points.sort(key=lambda tup: -tup[1])
         return points
 
     def contains_line(self, seg):
@@ -214,7 +217,7 @@ class polygon_set(object):
         AUTHOR: Mary Solbrig
         """
 
-        if(self.contains_point(seg[0]) and self.contains_point(seg[1])):
+        if self.contains_point(seg[0]) and self.contains_point(seg[1]):
             if(len(self.intersections_with(seg)) == 0):
                 return True
         else:
@@ -259,26 +262,26 @@ class polygon_set(object):
             for i in range(len(polygon)):
                 seg2 = (polygon[i-1],polygon[i])
                 #checks for point lying on an edge
-                if((seg2[1][0]-point[0]) + (point[0]-seg2[0][0]) == (seg2[1][0]-seg2[0][0])):
-                    if((seg2[1][1]-point[1]) + (point[1]-seg2[0][1]) == (seg2[1][1]-seg2[0][1])):
+                if (seg2[1][0]-point[0]) + (point[0]-seg2[0][0]) == (seg2[1][0]-seg2[0][0]):
+                    if (seg2[1][1]-point[1]) + (point[1]-seg2[0][1]) == (seg2[1][1]-seg2[0][1]):
                         return True
                 #for each intersection, adds 1 to count
-                if(intersect(seg,seg2)[0]):
+                if intersect(seg,seg2)[0]:
                     #tests for case of vertical line directly above point
-                    if(intersect(seg,seg2)[1] == None):
+                    if intersect(seg,seg2)[1] == None:
                         if(polygon[i-2][0] <= polygon[i-1][0]):
                             coming_from_left = True
                         else:
                             coming_from_left = False
-                        if(polygon[i][0] <= polygon[(i+1) % len(polygon)][0]):
+                        if polygon[i][0] <= polygon[(i+1) % len(polygon)][0]:
                             going_to_left = True
                         else:
                             going_to_left = False
-                        if(coming_from_left != going_to_left):
+                        if coming_from_left != going_to_left:
                             count = count + 1
                     else:
                         count = count + 1
-            if(count%2 == 1):
+            if count%2 == 1:
                 return True
         return False
 
