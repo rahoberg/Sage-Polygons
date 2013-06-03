@@ -4,12 +4,12 @@ class polygon_set(object):
         self.corners = set_corners(array)
         self.edges = set_edges(self.corners)
 
-    def self.edges(array):
+    def set_edges(self,array):
         #returns an array of arrays of edges for each sub polygon
         edges = []
         for polygon in self.corners:
             polygon_edges = []
-            for i in range(len(polygon)):
+            for i in range(len(polygon)-1):
                 polygon_edges = polygon_edges + (polygon(i),polygon(i+1))
             edges = edges + polygon_edges
         return edges
