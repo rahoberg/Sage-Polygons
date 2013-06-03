@@ -21,8 +21,43 @@ class polygon_set(object):
             p+=polygon2d(vertices,fill=False,axes=False)
         show(p)
 
-    def set_corners(array):
-        return array
+    def set_corners(self,array):
+        vertices=[]
+        length=len(array)
+        k=0
+        while k<length:
+            if array[k]==array[(k+1)%length]:
+                k+=1
+            else:
+                vertices.append(points[k])
+                k+=1
+        length=len(vertices)
+        if length<3:
+            return vertices
+        corners=[]
+        k=0
+        while k < length:
+            x0=vertices[(k-1)%length][0]
+            x1=vertices[k][0]
+            x2=vertices[(k+1)%length][0]
+            y0=vertices[(k-1)%length][1]
+            y1=vertices[k][1]
+            y2=vertices[(k+1)%length][1]
+            try:
+                m1= (y1-y0)/(x1-x0)
+            except ZeroDivisionError:
+                m1=infinity
+            try:
+                m2=(y2-y1)/(x2-x1)
+            except ZeroDivisionError:
+                m2=infinity
+            if m1==m2:
+                #skip if surrounded by colinear points
+                k+=1
+            else:
+                corners.append(vertices[k])
+                k+=1
+        return corners
 
     def area(self):
         area = 0
