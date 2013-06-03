@@ -1,4 +1,3 @@
-
 class polygon_set(object):
 
     def __init__(self,array):
@@ -15,14 +14,59 @@ class polygon_set(object):
             edges = edges + polygon_edges
         return edges
 
-    def graph(self):
-        print self.corners[0]
-        p=polygon2d(self.corners[0],fill=False,axes=False)
+    def graph(self,figsize=4,fill=False,axes=False,rgbcolor=(0,0,1),thickness=None,aspect_ration=1.0,legend_label=None,**options):
+        p=polygon2d(self.corners[0],fill=fill,axes=axes,figsize=figsize)
         for vertices in self.corners[1:]:
-            p+=polygon2d(vertices,fill=False,axes=False)
+            p+=polygon2d(vertices,fill=fill,axes=axes,figsize=figsize)
         show(p)
-
+    
+    def split_graph(self,figsize=3,axes=False,fill=False):
+        for vertices in self.corners:
+            show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
+      
     def set_corners(self,array):
+        array=self.pre_set_corners(array)
+        segments=[]
+        polygons=[]
+        length=len(array)
+        if length<4:
+            return self.Colinear(array)
+        #check for any self-intersections- if they are found split
+        for i in range(length):
+            segment=[array[i],array[(i+1)%length]]
+            seglen=len(segments)
+            stilladd=True
+            for k in range(seglen-1):
+                intersection = self.intersect(segments[k],segment)
+                if intersection[0] and (i!=length-1 or k!=0): #allow first and last to intersect
+                    stilladd=False
+                    #everything before segment k
+                    prevsegs=segments[:k]
+                    #newsegs includes segment k
+                    newsegs=segments[k:]
+                    poi=intersection[1]
+                    if poi!=segments[k][1]:
+                        prevsegs.append([segments[k][0],poi])
+                    else:
+                        prevsegs.append(segments[k])
+                    if poi!=segment[1]:
+                        newsegs.append([segment[0],poi])
+                        prevsegs.append([poi,segment[1]])
+                    else:
+                        newsegs.append(segment)
+                    if poi!=segments[k][1]:
+                        newsegs[0][0]=poi
+                    polygons.append(self.Colinear(newsegs))
+                    segments=prevsegs
+                    break
+            if stilladd:
+                segments.append(segment)
+        polygons.append(self.Colinear(segments))
+        return polygons      
+      
+#helper function for set_corners
+#removes colinear points.
+    def pre_set_corners(self,array):
         vertices=[]
         length=len(array)
         k=0
@@ -58,7 +102,8 @@ class polygon_set(object):
             else:
                 corners.append(vertices[k])
                 k+=1
-        return [corners]
+        return corners
+
 
     def area(self):
         area = 0
