@@ -83,19 +83,19 @@ class polygon_set(object):
         edges_B = B.edges
         
         pointsA = []
-            for i in range(len(edges_A)):
-                pointsA += corners_A[i] + B.intersections_with(edges_A[i])
-            pointsA += corners_A[-1]
+        for i in range(len(edges_A)):
+            pointsA += corners_A[i] + B.intersections_with(edges_A[i])
+        pointsA += corners_A[-1]
         line_segA = []
-            for i in range(len(pointsA)-1):
-                line_segA += [(pointsA[i],pointsA[i+1])]
+        for i in range(len(pointsA)-1):
+            line_segA += [(pointsA[i],pointsA[i+1])]
         pointsB = []
-            for i in range(len(edges_B)):
-                pointsB += corners_B[i] + self.intersections_with(edges_B[i])
-            pointsB += corners_B[-1]
+        for i in range(len(edges_B)):
+            pointsB += corners_B[i] + self.intersections_with(edges_B[i])
+        pointsB += corners_B[-1]
         line_segB = []
-            for i in range(len(pointsB)-1):
-                line_segB += [(pointsB[i],pointsB[i+1])]
+        for i in range(len(pointsB)-1):
+            line_segB += [(pointsB[i],pointsB[i+1])]
                 
         A_inner_segs = []
         inner_seg = []
