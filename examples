@@ -2,14 +2,13 @@ corners1=[(0,0),(1,1),(0,1),(15,2),(30,4)]
 corners2=[(0,0),(1,0),(0,1),(1,1)]
 corners3=[(15,2),(16,7),(3,14),(0,2),(4,17),(7,6),(5,2),(2,2)]
 corners5=[(1,1),(0,0),(1,0),(1,1),(2,2),(3,3),(3,4),(2,2)]
-corners4=[(0,0),(1,2),(2,0),(0,1.4),(2,1.4)]
-corners=corners5
+#corners4=[(0,0),(1,2),(2,0),(0,1.4),(2,1.4)]
+corners=corners1
 p=polygon_set(corners)
-print p.corners
-print p.pre_set_corners([(1, 0), (1, 1), (2, 2), (1, 1)])
+#print p.corners
+#print p.pre_set_corners([(1, 0), (1, 1), (2, 2), (1, 1)])
 print "Original Points (Sage polygon2d):"
-show(polygon2d(corners,axes=True, figsize=5,fill=False))
-print "With Adjacent Colinear Points Removed:"
-p.graph(axes=True,figsize=5)
-print "Split at Intersections (needs work):"
-p.split_graph(axes=True,figsize=5)
+show(polygon2d(corners,axes=True, figsize=10,fill=False))
+print "Remove Colinear Points, Split at Intersections (needs work):"
+p.graph(axes=True,figsize=10)
+#p.split_graph(axes=True,figsize=5)
