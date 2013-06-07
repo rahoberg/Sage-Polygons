@@ -57,52 +57,7 @@ class polygon_set(object):
         return polygon
 <<<<<<< HEAD
 
-=======
-      
->>>>>>> Mary-Branch
-    def set_corners(self,array):
-        array=self.pre_set_corners(array)
-        segments=[]
-        polygons=[]
-        length=len(array)
-        if length<4:
-            return self.Colinear(array)
-        #check for any self-intersections- if they are found split
-        for i in range(length):
-            segment=[array[i],array[(i+1)%length]]
-            seglen=len(segments)
-            stilladd=True
-            for k in range(seglen-1):
-                intersection = self.intersect(segments[k],segment)
-                if intersection[0] and (i!=length-1 or k!=0): #allow first and last to intersect
-                    stilladd=False
-                    #everything before segment k
-                    prevsegs=segments[:k]
-                    #newsegs includes segment k
-                    newsegs=segments[k:]
-                    poi=intersection[1]
-                    if poi!=segments[k][1]:
-                        prevsegs.append([segments[k][0],poi])
-                    else:
-                        prevsegs.append(segments[k])
-                    if poi!=segment[1]:
-                        newsegs.append([segment[0],poi])
-                        prevsegs.append([poi,segment[1]])
-                    else:
-                        newsegs.append(segment)
-                    if poi!=segments[k][1]:
-                        newsegs[0][0]=poi
-                    polygons.append(self.Colinear(newsegs))
-                    segments=prevsegs
-                    break
-            if stilladd:
-                segments.append(segment)
-        polygons.append(self.Colinear(segments))
-        return polygons
 
-    #helper function for set_corners
-    #removes colinear points.
-=======
 =======
 >>>>>>> b3f0756ab8d368ecf214706e4d8ab4f0e520dd11
       
@@ -154,14 +109,8 @@ class polygon_set(object):
             return polygons
     
       
-<<<<<<< HEAD
-#helper function for set_corners
-#removes colinear points.
->>>>>>> b3f0756ab8d368ecf214706e4d8ab4f0e520dd11
-=======
     #helper function for set_corners
     #removes colinear points.
->>>>>>> Mary-Branch
     def pre_set_corners(self,array):
         vertices=[]
         length=len(array)
@@ -221,12 +170,6 @@ class polygon_set(object):
     def intersection(self, B):
         edges_A = self.edges
         edges_B = B.edges
-
-<<<<<<< HEAD
-
-=======
-        
->>>>>>> Mary-Branch
         line_segs_A = []
         B_contains = []
         for polygon in edges_A:
@@ -239,11 +182,7 @@ class polygon_set(object):
                 polygon_contains +=B.contains_line((points_in_polygon[i-1],points_in_polygon[i]))
             B_contains += [polygon_contains]
             line_segs_A += [line_segs_polygon]
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> Mary-Branch
         line_segB = []
         for polygon in edges_B:
             points_in_polygon = []
