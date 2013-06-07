@@ -26,6 +26,7 @@ class polygon_set(object):
         for vertices in self.corners:
             show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     def Colinear(self,segments):
         polygon=[]
@@ -94,6 +95,8 @@ class polygon_set(object):
     #helper function for set_corners
     #removes colinear points.
 =======
+=======
+>>>>>>> b3f0756ab8d368ecf214706e4d8ab4f0e520dd11
       
     def set_corners(self,points):
         if points==[]:
