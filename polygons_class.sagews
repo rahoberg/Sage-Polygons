@@ -27,7 +27,11 @@ class polygon_set(object):
             show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> Mary-Branch
     def Colinear(self,segments):
         polygon=[]
         length=len(segments)
@@ -51,7 +55,11 @@ class polygon_set(object):
                 polygon.append(segments[k][1])
                 k+=2
         return polygon
+<<<<<<< HEAD
 
+=======
+      
+>>>>>>> Mary-Branch
     def set_corners(self,array):
         array=self.pre_set_corners(array)
         segments=[]
@@ -146,9 +154,14 @@ class polygon_set(object):
             return polygons
     
       
+<<<<<<< HEAD
 #helper function for set_corners
 #removes colinear points.
 >>>>>>> b3f0756ab8d368ecf214706e4d8ab4f0e520dd11
+=======
+    #helper function for set_corners
+    #removes colinear points.
+>>>>>>> Mary-Branch
     def pre_set_corners(self,array):
         vertices=[]
         length=len(array)
@@ -209,7 +222,11 @@ class polygon_set(object):
         edges_A = self.edges
         edges_B = B.edges
 
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> Mary-Branch
         line_segs_A = []
         B_contains = []
         for polygon in edges_A:
@@ -222,7 +239,11 @@ class polygon_set(object):
                 polygon_contains +=B.contains_line((points_in_polygon[i-1],points_in_polygon[i]))
             B_contains += [polygon_contains]
             line_segs_A += [line_segs_polygon]
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> Mary-Branch
         line_segB = []
         for polygon in edges_B:
             points_in_polygon = []
@@ -381,6 +402,11 @@ class polygon_set(object):
 
             sage: p = polygon([[(-1,-1),(1,-1),(1,1),(-1,1)],[(1,1),(4,1),(3,2),(1,1)]])
             sage: polygon.contains((1.5,.5))
+
+            returns FALSE
+            
+            sage: p = polygon([[(-1,-1),(1,-1),(1,1),(-1,1)],[(1,1),(4,1),(3,2),(1,1)]])
+            sage: polygon.contains((100,100))
 
             returns FALSE
 
