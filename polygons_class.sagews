@@ -20,11 +20,11 @@ class polygon_set(object):
         for vertices in self.corners[1:]:
             p+=polygon2d(vertices,fill=fill,axes=axes,figsize=figsize)
         show(p)
-
+    
     def split_graph(self,figsize=3,axes=False,fill=False):
         for vertices in self.corners:
             show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
-
+            
     def Colinear(self,segments):
         polygon=[]
         length=len(segments)
@@ -48,7 +48,7 @@ class polygon_set(object):
                 polygon.append(segments[k][1])
                 k+=2
         return polygon
-
+      
     def set_corners(self,array):
         array=self.pre_set_corners(array)
         segments=[]
@@ -87,8 +87,8 @@ class polygon_set(object):
             if stilladd:
                 segments.append(segment)
         polygons.append(self.Colinear(segments))
-        return polygons
-
+        return polygons      
+      
     #helper function for set_corners
     #removes colinear points.
     def pre_set_corners(self,array):
@@ -151,7 +151,7 @@ class polygon_set(object):
         edges_A = self.edges
         edges_B = B.edges
 
-
+        
         line_segs_A = []
         B_contains = []
         for polygon in edges_A:
@@ -164,7 +164,7 @@ class polygon_set(object):
                 polygon_contains +=B.contains_line((points_in_polygon[i-1],points_in_polygon[i]))
             B_contains += [polygon_contains]
             line_segs_A += [line_segs_polygon]
-
+            
         line_segB = []
         for polygon in edges_B:
             points_in_polygon = []
@@ -325,7 +325,7 @@ class polygon_set(object):
             sage: polygon.contains((1.5,.5))
 
             returns FALSE
-
+            
             sage: p = polygon([[(-1,-1),(1,-1),(1,1),(-1,1)],[(1,1),(4,1),(3,2),(1,1)]])
             sage: polygon.contains((100,100))
 
