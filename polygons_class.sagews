@@ -1,4 +1,3 @@
-%auto
 class polygon_set(object):
 
     def __init__(self,array,holes=[]):
@@ -25,13 +24,7 @@ class polygon_set(object):
     def split_graph(self,figsize=3,axes=False,fill=False):
         for vertices in self.corners:
             show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
-            
->>>>>>> Mary-Branch
     def Colinear(self,segments):
         polygon=[]
         length=len(segments)
@@ -39,28 +32,27 @@ class polygon_set(object):
         while k < length:
             #assumes that end of a segment is beginning of next
             try:
-                m1= (segments[k][1][1]-segments[k][0][1])/(segments[k][1][0]-segments[k][0][0])
+                m1= (segments[k].point2[1]-segments[k].point1[1])/(segments[k].point2[0]-segments[k].point1[0])
             except ZeroDivisionError:
                 m1=infinity
             try:
-                m2=(segments[(k+1)%length][1][1]-segments[(k+1)%length][0][1])/(segments[(k+1)%length][1][0]-segments[(k+1)%length][0][0])
+                m2=(segments[(k+1)%length].point2[1]-segments[(k+1)%length].point1[1])/(segments[(k+1)%length].point2[0]-segments[(k+1)%length].point1[0])
             except ZeroDivisionError:
                 m2=infinity
             if m1==m2:
-                polygon.append(segments[k][0])
-                polygon.append(segments[k+1][1])
+                polygon.append(segments[k].point1)
+                polygon.append(segments[k+1].point2)
                 k+=3
             else:
-                polygon.append(segments[k][0])
-                polygon.append(segments[k][1])
+                polygon.append(segments[k].point1)
+                polygon.append(segments[k].point2)
                 k+=2
         return polygon
-<<<<<<< HEAD
-
-
-=======
->>>>>>> b3f0756ab8d368ecf214706e4d8ab4f0e520dd11
       
+
+    #helper function for set_corners
+    #removes colinear points.
+
     def set_corners(self,points):
         if points==[]:
             return []
@@ -70,6 +62,7 @@ class polygon_set(object):
         except TypeError:
             vertices=[points]
         for array in vertices:
+            array=self.pre_set_corners(array)
             segments=[]
             polygons=[]
             length=len(array)
@@ -100,15 +93,17 @@ class polygon_set(object):
                             newsegs.append(seg)
                         if poi!=segments[k].point2:
                             newsegs[0].point1=poi
-                        polygons.append(Colinear(newsegs))
+                        polygons.append(self.Colinear(newsegs))
                         segments=prevsegs
                         break
                 if stilladd:
                     segments.append(seg)
-            polygons.append(Colinear(segments))
+            polygons.append(self.Colinear(segments))
             return polygons
     
-      
+#helper function for set_corners
+#removes colinear points.
+
     #helper function for set_corners
     #removes colinear points.
     def pre_set_corners(self,array):
@@ -170,6 +165,7 @@ class polygon_set(object):
     def intersection(self, B):
         edges_A = self.edges
         edges_B = B.edges
+
         line_segs_A = []
         B_contains = []
         for polygon in edges_A:
@@ -420,13 +416,18 @@ class polygon_set(object):
         pass
     def convex(self):
         pass
-
-    def intersect(self,seg1,seg2):
+        
+class segment(object):
+    def __init__(self,point1,point2):
+        #self.seg=[point1,point2]
+        self.point1=point1
+        self.point2=point2
+    def intersect(self,other):
         #one segment is [a,b], the other is [c,d]
-        a=seg1[0]
-        b=seg1[1]
-        c=seg2[0]
-        d=seg2[1]
+        a=self.point1
+        b=self.point2
+        c=other.point1
+        d=other.point2
         #if slopes are equal, they're either the same line or parallel
         if (b[1]-a[1])*(d[0]-c[0]) == (d[1]-c[1])*(b[0]-a[0]):
             #if slope between a point on seg1 and a point on seg2 is same as m1,
