@@ -1,8 +1,9 @@
+%auto
 class polygon_set(object):
 
     def __init__(self,array):
         self.corners = self.set_corners(array)
-        #self.edges = self.set_edges(self.corners)
+        self.edges = self.set_edges(self.corners)
 
     def set_edges(self,array):
         #returns an array of arrays of edges for each sub polygon
@@ -10,22 +11,44 @@ class polygon_set(object):
         for polygon in self.corners:
             polygon_edges = []
             for i in range(len(polygon)-1):
-                polygon_edges = polygon_edges + (polygon(i),polygon(i+1))
-            edges = edges + polygon_edges
+                polygon_edges = polygon_edges + [(polygon[i],polygon[i+1])]
+            edges = edges + [polygon_edges]
         return edges
 
     def graph(self,figsize=4,fill=False,axes=False,rgbcolor=(0,0,1),thickness=None,aspect_ration=1.0,legend_label=None,**options):
-        p=polygon2d(self.corners[0],fill=fill,axes=axes,figsize=figsize,rgbcolor=(0,0,1))
-        i=0
+        p=polygon2d(self.corners[0],fill=fill,axes=axes,figsize=figsize)
         for vertices in self.corners[1:]:
-            p+=polygon2d(vertices,fill=fill,axes=axes,figsize=figsize,rgbcolor=(i+1%2,0,i%2))
-            i+=1
+            p+=polygon2d(vertices,fill=fill,axes=axes,figsize=figsize)
         show(p)
-    
+
     def split_graph(self,figsize=3,axes=False,fill=False):
         for vertices in self.corners:
             show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
-      
+
+    def Colinear(self,segments):
+        polygon=[]
+        length=len(segments)
+        k=0
+        while k < length:
+            #assumes that end of a segment is beginning of next
+            try:
+                m1= (segments[k][1][1]-segments[k][0][1])/(segments[k][1][0]-segments[k][0][0])
+            except ZeroDivisionError:
+                m1=infinity
+            try:
+                m2=(segments[(k+1)%length][1][1]-segments[(k+1)%length][0][1])/(segments[(k+1)%length][1][0]-segments[(k+1)%length][0][0])
+            except ZeroDivisionError:
+                m2=infinity
+            if m1==m2:
+                polygon.append(segments[k][0])
+                polygon.append(segments[k+1][1])
+                k+=3
+            else:
+                polygon.append(segments[k][0])
+                polygon.append(segments[k][1])
+                k+=2
+        return polygon
+
     def set_corners(self,array):
         array=self.pre_set_corners(array)
         segments=[]
@@ -64,10 +87,10 @@ class polygon_set(object):
             if stilladd:
                 segments.append(segment)
         polygons.append(self.Colinear(segments))
-        return polygons      
-      
-#helper function for set_corners
-#removes colinear points.
+        return polygons
+
+    #helper function for set_corners
+    #removes colinear points.
     def pre_set_corners(self,array):
         vertices=[]
         length=len(array)
@@ -124,26 +147,33 @@ class polygon_set(object):
 
         pass
 
-    def intersect(self, B):
-        corners_A = self.corners
-        corners_B = B.corners
+    def intersection(self, B):
         edges_A = self.edges
         edges_B = B.edges
 
-        pointsA = []
-        for i in range(len(edges_A)):
-            pointsA += corners_A[i] + B.intersections_with(edges_A[i])
-        pointsA += corners_A[-1]
-        line_segA = []
-        for i in range(len(pointsA)-1):
-            line_segA += [(pointsA[i],pointsA[i+1])]
-        pointsB = []
-        for i in range(len(edges_B)):
-            pointsB += corners_B[i] + self.intersections_with(edges_B[i])
-        pointsB += corners_B[-1]
+
+        line_segs_A = []
+        B_contains = []
+        for polygon in edges_A:
+            points_in_polygon = []
+            line_segs_polygon = []
+            for edge in polygon:
+                points_in_polygon += [edge[0]] + B.intersections_with(edge)
+            for i in range(len(points_in_polygon)):
+                line_segs_polygon += [(points_in_polygon[i-1],points_in_polygon[i])]
+                polygon_contains +=B.contains_line((points_in_polygon[i-1],points_in_polygon[i]))
+            B_contains += [polygon_contains]
+            line_segs_A += [line_segs_polygon]
+
         line_segB = []
-        for i in range(len(pointsB)-1):
-            line_segB += [(pointsB[i],pointsB[i+1])]
+        for polygon in edges_B:
+            points_in_polygon = []
+            line_segs_polygon = []
+            for edge in polygon:
+                points_in_polygon += [edge[0]] + self.intersections_with(edge)
+            for i in range(len(points_in_polygon)):
+                line_segs_polygon += [(points_in_polygon[i-1],points_in_polygon[i])]
+            line_segB += [line_segs_polygon]
 
         A_inner_segs = []
         inner_seg = []
@@ -216,7 +246,7 @@ class polygon_set(object):
 
     def intersections_with(self, seg):
         r"""
-        Takes a line segment seg = (a,b) and returns the list of points on the polygon that
+        Takes a line segment seg = (a,b) and returns the list of points on the boundary of the polygon that
         intersects seg, ordered from closest to a.
 
         !!!!!!Currently can't deal with co-linear segments.
@@ -231,12 +261,12 @@ class polygon_set(object):
         points = []
         for polygon in self.edges:
             for edge in polygon:
-                if (intersect(seg,edge)[0]):
-                    if (intersect(seg,edge)[1] == None):
+                if (self.intersect(seg,edge)[0]):
+                    if (self.intersect(seg,edge)[1] == None):
                         #I don't really know what to do here yet
                         pass
                     else:
-                        points += intersect(seg,edge)[1]
+                        points += [self.intersect(seg,edge)[1]]
              #orders the points
             if seg[0][0] < seg[1][0]:
                 #order by increasing x
@@ -267,8 +297,7 @@ class polygon_set(object):
         if self.contains_point(seg[0]) and self.contains_point(seg[1]):
             if(len(self.intersections_with(seg)) == 0):
                 return True
-        else:
-            return False
+        return False
 
 
     def contains_point(self, point):
@@ -297,30 +326,32 @@ class polygon_set(object):
 
             returns FALSE
 
+            sage: p = polygon([[(-1,-1),(1,-1),(1,1),(-1,1)],[(1,1),(4,1),(3,2),(1,1)]])
+            sage: polygon.contains((100,100))
+
+            returns FALSE
+
         AUTHOR: Mary Solbrig
         """
 
         #Note: could be made better by using self.edges instead of self.corners
-        seg = (point,(point[0],self.bounding_rectangle()[2]))
+        seg = (point,(point[0],max(self.bounding_rectangle()[2],point[1])))
+        count = 0
         for polygon in self.corners:
-            if point in self.corners:
-                return True
-            count = 0
             for i in range(len(polygon)):
                 seg2 = (polygon[i-1],polygon[i])
                 #checks for point lying on an edge
-                if (seg2[1][0]-point[0]) + (point[0]-seg2[0][0]) == (seg2[1][0]-seg2[0][0]):
-                    if (seg2[1][1]-point[1]) + (point[1]-seg2[0][1]) == (seg2[1][1]-seg2[0][1]):
-                        return True
+                if self.intersect([point,point],seg2)[0]:
+                    return True
                 #for each intersection, adds 1 to count
-                if intersect(seg,seg2)[0]:
+                if self.intersect(seg,seg2)[0]:
                     #tests for case of vertical line directly above point
-                    if intersect(seg,seg2)[1] == None:
+                    if self.intersect(seg,seg2)[1] == None:
                         if(polygon[i-2][0] <= polygon[i-1][0]):
                             coming_from_left = True
                         else:
                             coming_from_left = False
-                        if polygon[i][0] <= polygon[(i+1) % len(polygon)][0]:
+                        if polygon[i][0] >= polygon[(i+1) % len(polygon)][0]:
                             going_to_left = True
                         else:
                             going_to_left = False
