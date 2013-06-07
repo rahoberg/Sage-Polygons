@@ -1,6 +1,7 @@
 class polygon_set(object):
 
-    def __init__(self,array):
+    def __init__(self,array,holes=[]):
+        self.holes=self.set_corners(holes)
         self.corners = self.set_corners(array)
         #self.edges = self.set_edges(self.corners)
 
@@ -26,45 +27,53 @@ class polygon_set(object):
         for vertices in self.corners:
             show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
       
-    def set_corners(self,array):
-        array=self.pre_set_corners(array)
-        segments=[]
-        polygons=[]
-        length=len(array)
-        if length<4:
-            return self.Colinear(array)
-        #check for any self-intersections- if they are found split
-        for i in range(length):
-            segment=[array[i],array[(i+1)%length]]
-            seglen=len(segments)
-            stilladd=True
-            for k in range(seglen-1):
-                intersection = self.intersect(segments[k],segment)
-                if intersection[0] and (i!=length-1 or k!=0): #allow first and last to intersect
-                    stilladd=False
-                    #everything before segment k
-                    prevsegs=segments[:k]
-                    #newsegs includes segment k
-                    newsegs=segments[k:]
-                    poi=intersection[1]
-                    if poi!=segments[k][1]:
-                        prevsegs.append([segments[k][0],poi])
-                    else:
-                        prevsegs.append(segments[k])
-                    if poi!=segment[1]:
-                        newsegs.append([segment[0],poi])
-                        prevsegs.append([poi,segment[1]])
-                    else:
-                        newsegs.append(segment)
-                    if poi!=segments[k][1]:
-                        newsegs[0][0]=poi
-                    polygons.append(self.Colinear(newsegs))
-                    segments=prevsegs
-                    break
-            if stilladd:
-                segments.append(segment)
-        polygons.append(self.Colinear(segments))
-        return polygons      
+    def set_corners(self,points):
+        if points==[]:
+            return []
+        try: 
+            iter(points[0][0])
+            vertices=points
+        except TypeError:
+            vertices=[points]
+        for array in vertices:
+            segments=[]
+            polygons=[]
+            length=len(array)
+            if length<2:
+                return array
+            #check for any self-intersections- if they are found split
+            for i in range(length):
+                seg=segment(array[i],array[(i+1)%length])
+                seglen=len(segments)
+                stilladd=True
+                for k in range(seglen-1):
+                    intersection = segments[k].intersect(seg)
+                    if intersection[0] and (i!=length-1 or k!=0): #allow first and last to intersect
+                        stilladd=False
+                        #everything before segment k
+                        prevsegs=segments[:k]
+                        #newsegs includes segment k
+                        newsegs=segments[k:]
+                        poi=intersection[1]
+                        if poi!=segments[k].point2:
+                            prevsegs.append(segment(segments[k].point1,poi))
+                        else:
+                            prevsegs.append(segments[k])
+                        if poi!=seg.point2:
+                            newsegs.append(segment(seg.point1,poi))
+                            prevsegs.append(segment(poi,seg.point2))
+                        else:
+                            newsegs.append(seg)
+                        if poi!=segments[k].point2:
+                            newsegs[0].point1=poi
+                        polygons.append(Colinear(newsegs))
+                        segments=prevsegs
+                        break
+                if stilladd:
+                    segments.append(seg)
+            polygons.append(Colinear(segments))
+            return polygons
+    
       
 #helper function for set_corners
 #removes colinear points.
