@@ -1,3 +1,4 @@
+%auto
 class polygon_set(object):
 
     def __init__(self,array,holes=[]):
@@ -10,8 +11,8 @@ class polygon_set(object):
         edges = []
         for polygon in self.corners:
             polygon_edges = []
-            for i in range(len(polygon)-1):
-                polygon_edges = polygon_edges + [(polygon[i],polygon[i+1])]
+            for i in range(len(polygon)):
+                polygon_edges = polygon_edges + [segment(polygon[i-1],polygon[i])]
             edges = edges + [polygon_edges]
         return edges
 
@@ -171,10 +172,11 @@ class polygon_set(object):
         for polygon in edges_A:
             points_in_polygon = []
             line_segs_polygon = []
+            polygon_contains = []
             for edge in polygon:
-                points_in_polygon += [edge[0]] + B.intersections_with(edge)
+                points_in_polygon += [edge.point1] + B.intersections_with(edge)
             for i in range(len(points_in_polygon)):
-                line_segs_polygon += [(points_in_polygon[i-1],points_in_polygon[i])]
+                line_segs_polygon += [segment(points_in_polygon[i-1],points_in_polygon[i])]
                 polygon_contains +=B.contains_line((points_in_polygon[i-1],points_in_polygon[i]))
             B_contains += [polygon_contains]
             line_segs_A += [line_segs_polygon]
@@ -275,23 +277,23 @@ class polygon_set(object):
         points = []
         for polygon in self.edges:
             for edge in polygon:
-                if (self.intersect(seg,edge)[0]):
-                    if (self.intersect(seg,edge)[1] == None):
+                if (seg.intersect(edge)[0]):
+                    if (seg.intersect(edge)[1] == None):
                         #I don't really know what to do here yet
                         pass
                     else:
-                        points += [self.intersect(seg,edge)[1]]
+                        points += [seg.intersect(edge)[1]]
              #orders the points
-            if seg[0][0] < seg[1][0]:
+            if seg.point1[0] < seg.point2[0]:
                 #order by increasing x
                 points.sort(key=lambda tup: tup[0])
-            elif seg[0][0] < seg[1][0]:
+            elif seg.point1[0] < seg.point2[0]:
                 #order by decreasing x
                 points.sort(key=lambda tup: -tup[0])
-            elif seg[0][1] < seg[1][1]:
+            elif seg.point1[1] < seg.point2[1]:
                 #order by increasing y
                 points.sort(key=lambda tup: tup[1])
-            elif seg[0][1] > seg[1][1]:
+            elif seg.point1[1] > seg[1][1]:
                 #order by decreasing y
                 points.sort(key=lambda tup: -tup[1])
         return points
@@ -308,7 +310,7 @@ class polygon_set(object):
         AUTHOR: Mary Solbrig
         """
 
-        if self.contains_point(seg[0]) and self.contains_point(seg[1]):
+        if self.contains_point(seg.point1) and self.contains_point(seg.point2):
             if(len(self.intersections_with(seg)) == 0):
                 return True
         return False
@@ -353,27 +355,29 @@ class polygon_set(object):
         AUTHOR: Mary Solbrig
         """
 
-        #Note: could be made better by using self.edges instead of self.corners
-        seg = (point,(point[0],max(self.bounding_rectangle()[2],point[1])))
+        vertical_line = segment(point,(point[0],max(self.bounding_rectangle()[1]+1,point[1])))
         count = 0
-        for polygon in self.corners:
+        for polygon in self.edges:
             for i in range(len(polygon)):
-                seg2 = (polygon[i-1],polygon[i])
-                #checks for point lying on an edge
-                if self.intersect([point,point],seg2)[0]:
+                seg = polygon[i]
+                #checks for point lying on an edge or corner
+                if seg.contains(point): 
                     return True
                 #for each intersection, adds 1 to count
-                if self.intersect(seg,seg2)[0]:
+                intersect = vertical_line.intersect(seg)
+                if intersect[0]:
                     #tests for case of vertical line directly above point
-                    if self.intersect(seg,seg2)[1] == None:
-                        if(polygon[i-2][0] <= polygon[i-1][0]):
+                    if intersect[1] == None:
+                        if(polygon[i-1].point1[0] <= seg.point1[0]):
                             coming_from_left = True
                         else:
                             coming_from_left = False
-                        if polygon[i][0] >= polygon[(i+1) % len(polygon)][0]:
+
+                        if polygon[(i+1) % len(polygon)].point2[0] <= seg.point2[0]:
                             going_to_left = True
                         else:
                             going_to_left = False
+                        
                         if coming_from_left != going_to_left:
                             count = count + 1
                     else:
@@ -422,6 +426,10 @@ class segment(object):
         #self.seg=[point1,point2]
         self.point1=point1
         self.point2=point2
+        
+    def __repr__(self):
+        return "Segment: " + str([self.point1,self.point2])
+        
     def intersect(self,other):
         #one segment is [a,b], the other is [c,d]
         a=self.point1
@@ -450,3 +458,21 @@ class segment(object):
             return (True,(t*a[0]+(1-t)*b[0],t*a[1]+(1-t)*b[1]))
         else:
             return (False,None)
+    
+    def length(self):
+        return ((self.point1[0] - self.point2[0])^2 + (self.point1[1] - self.point2[1])^2)^(1/2)
+            
+    def contains(self,point):
+        if point == self.point1 or point == self.point2:
+            return True
+        elif self.point1 == self.point2:
+            return False
+        else:
+            dot = (self.point2[0]-self.point1[0])*(point[0]-self.point1[0]) + (self.point2[1]-self.point1[1])*(point[1]-self.point1[1])
+            abs1 = (self.point2[0]-self.point1[0])^2 + (self.point2[1]-self.point1[1])^2
+            abs2 = (point[0]-self.point1[0])^2 + (point[1]-self.point1[1])^2
+         
+            if dot^2 == abs1*abs2 and abs2/abs1 < 1 and abs2/abs1 >0:
+                return True
+            else:
+                return False
