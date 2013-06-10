@@ -1,7 +1,10 @@
 Sage-Polygons
 =============
 
-Initial coding component: To make a non-graphics oriented polygon object. One should be able to initialize it the same way one initializes the current polygon objects (with a list of coordinates, two lists, one of x values one of y values, bounding planes, etc), but it would not initially be a graphics object. Basic properties geographic properties such as area, perimeter, intersection, union should be easy to obtain.
+The tex file describes the project and what we've implemented.
+The project can be found in the polygons_class.sagews file.
+
+Our original goal: To make a non-graphics oriented polygon object. One should be able to initialize it the same way one initializes the current polygon objects (with a list of coordinates, two lists, one of x values one of y values, bounding planes, etc), but it would not initially be a graphics object. Basic properties geographic properties such as area, perimeter, intersection, union should be easy to obtain.
 
 A = polygon(points)
 B = polygon(points
