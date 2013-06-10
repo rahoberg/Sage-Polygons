@@ -175,8 +175,7 @@ class polygon_set(object):
             k = p.intersection(q)
             p.graph(axes = True)
             q.graph(axes = True)
-            for i in k:
-                i.graph(axes = True)
+            k.graph()
         """
         
         edges_A = self.edges
@@ -204,7 +203,6 @@ class polygon_set(object):
                     if points_on_edge[i] != points_on_edge[i+1] and self.contains_line(segment(points_on_edge[i],points_on_edge[i+1])):
                         new_edges.append(segment(points_on_edge[i],points_on_edge[i+1]))
         
-        print(new_edges)
         new_corners = [[]]
         i = 0
         
@@ -239,10 +237,8 @@ class polygon_set(object):
                         new_edges.remove(edge)
             i += 1
             new_corners += [[]]
-        poly_array = []
-        for i in new_corners:
-              poly_array.append(polygon_set(i))                  
-        return(poly_array)
+        new_corners.pop(-1)                 
+        return(polygon_set(new_corners))
 
     def set_difference(self, other):
         pass
