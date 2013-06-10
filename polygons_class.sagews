@@ -11,8 +11,8 @@ class polygon_set(object):
         edges = []
         for polygon in self.corners:
             polygon_edges = []
-            for i in range(len(polygon)):
-                polygon_edges = polygon_edges + [segment(polygon[i-1],polygon[i])]
+            for i in range(len(polygon)-1):
+                polygon_edges = polygon_edges + [segment(polygon[i],polygon[i+1])]
             edges = edges + [polygon_edges]
         return edges
 
@@ -162,100 +162,87 @@ class polygon_set(object):
     def union(self, other):
 
         pass
+    
+    def equal(self, p1, p2):
+        epsilon = 0.0000001
+        return (abs(p1[0] - p2[0]) < epsilon) and (abs(p1[1] - p2[1]) < epsilon)
 
     def intersection(self, B):
+        r"""
+        EXAMPLES:
+            p = polygon_set([[(-1,-1),(1,-1),(1,-.33),(.33,-.33),(.33,.33),(1,1),(-1,1)]])
+            q = polygon_set([[(.2,-2),(.2,2),(2,2),(2,-2)]])
+            k = p.intersection(q)
+            p.graph(axes = True)
+            q.graph(axes = True)
+            for i in k:
+                i.graph(axes = True)
+        """
+        
         edges_A = self.edges
         edges_B = B.edges
-
+        new_edges = []
         line_segs_A = []
-        B_contains = []
+        line_segs_B = []
+        
+        #adds line segments of A that lie in B
         for polygon in edges_A:
-            points_in_polygon = []
-            line_segs_polygon = []
-            polygon_contains = []
+            points_on_edge = []
             for edge in polygon:
-                points_in_polygon += [edge.point1] + B.intersections_with(edge)
-            for i in range(len(points_in_polygon)):
-                line_segs_polygon += [segment(points_in_polygon[i-1],points_in_polygon[i])]
-                polygon_contains +=B.contains_line((points_in_polygon[i-1],points_in_polygon[i]))
-            B_contains += [polygon_contains]
-            line_segs_A += [line_segs_polygon]
+                points_on_edge = [edge.point1] + B.intersections_with(edge) + [edge.point2]
+                for i in range(len(points_on_edge)-1):
+                    if points_on_edge[i] != points_on_edge[i+1] and B.contains_line(segment(points_on_edge[i],points_on_edge[i+1])):
+                        new_edges.append(segment(points_on_edge[i],points_on_edge[i+1]))
 
-        line_segB = []
+
+        #adds line segments of A that lie in B
         for polygon in edges_B:
-            points_in_polygon = []
-            line_segs_polygon = []
+            points_on_edge = []
             for edge in polygon:
-                points_in_polygon += [edge[0]] + self.intersections_with(edge)
-            for i in range(len(points_in_polygon)):
-                line_segs_polygon += [(points_in_polygon[i-1],points_in_polygon[i])]
-            line_segB += [line_segs_polygon]
+                points_on_edge = [edge.point1] + self.intersections_with(edge) + [edge.point2]
+                for i in range(len(points_on_edge)-1):
+                    if points_on_edge[i] != points_on_edge[i+1] and self.contains_line(segment(points_on_edge[i],points_on_edge[i+1])):
+                        new_edges.append(segment(points_on_edge[i],points_on_edge[i+1]))
+        
+        print(new_edges)
+        new_corners = [[]]
+        i = 0
+        
+        
+        
+        #new point "equals" first point, close off polygon and begin again
+        while(new_edges != []):
+            new_corners[i].append(new_edges[0].point1)
+            new_corners[i].append(new_edges[0].point2)
+            new_edges.pop(0)
+            loops = 0
+            while(not(self.equal(new_corners[i][0],new_corners[i][-1])) and new_edges != [] and loops < 10000):
+                loops +=1
+                seen = false
+                for edge in new_edges:
+                    a = edge.point1
+                    b = edge.point2
+                    if self.equal(a,new_corners[i][-1]):
+                        if not seen:
+                            new_corners[i].append(b)
+                            new_edges.remove(edge)
+                        seen = True
+                    elif self.equal(b,new_corners[i][-1]):
+                        if not seen:
+                            new_corners[i].append(a)
+                            new_edges.remove(edge)
+                        seen = True
+                        
 
-        A_inner_segs = []
-        inner_seg = []
-        previous_state = False
-        for i in range(len(line_segA)):
-            current_state = B.contains_line(line_segA[i])
-            if not previous_state and not current_state:
-                pass
-            elif not previous_state and current_state:
-                inner_seg += [pointsA[i],pointsA[i+1]]
-            elif previous_state and current_state:
-                inner_seg += [pointsA[i+1]]
-            elif previous_state and not current_state:
-                A_inner_segs += inner_seg
-                inner_seg = []
-            previous_state = current_state
-        if len(inner_seg) == 0 | len(A_inner_segs) == 0:
-            A_inner_segs += inner_seg
-        elif A_inner_segs[0][0] == inner_seg[-1]:
-            A_inner_segs[0] += inner_seg
-        else:
-            A_inner_segs += inner_seg
-
-        B_inner_segs = []
-        inner_seg = []
-        previous_state = False
-        for i in range(len(line_segB)):
-            current_state = self.contains_line(line_segB[i])
-            if not previous_state and not current_state:
-                pass
-            elif not previous_state and current_state:
-                inner_seg += [pointsB[i],pointsB[i+1]]
-            elif previous_state and current_state:
-                inner_seg += [pointsB[i+1]]
-            elif previous_state and not current_state:
-                B_inner_segs += inner_seg
-                inner_seg = []
-            previous_state = current_state
-        if len(inner_seg) == 0 | len(B_inner_segs) == 0:
-            B_inner_segs += inner_seg
-        elif B_inner_segs[0][0] == inner_seg[-1]:
-            B_inner_segs[0] += inner_seg
-        else:
-            B_inner_segs += inner_seg
-
-
-        new_poly = []
-        for Aseg in A_inner_segs:
-            while Aseg[0] != Aseg[-1]:
-                for Bseg in B_inner_segs:
-                    if Bseg[0] == Aseg[-1]:
-                        Aseg += Bseg[1:]
-                for Aseg2 in A_inner_segs:
-                    if Aseg2[0] == Aseg[-1]:
-                        Aseg += Aseg2[1:]
-            new_poly += Aseg
-        for Bseg in B_inner_segs:
-            while(Bseg[0] != Bseg[-1]):
-                for Aseg in A_inner_segs:
-                    if(Aseg[0] == Bseg[-1]):
-                        Bseg += Aseg[1:]
-                for Bseg2 in B_inner_segs:
-                    if(Bseg2[0] == Bseg[-1]):
-                        Bseg += Bseg2[1:]
-            new_poly += Bseg
-        return(polygon_set(set(new_poly)))
+                for edge in new_edges:
+                    if self.equal(edge.point1,new_corners[i][-2]) or self.equal(edge.point2,new_corners[i][-2]):
+                        new_edges.remove(edge)
+            i += 1
+            new_corners += [[]]
+        poly_array = []
+        for i in new_corners:
+              poly_array.append(polygon_set(i))                  
+        return(poly_array)
 
     def set_difference(self, other):
         pass
@@ -283,7 +270,9 @@ class polygon_set(object):
                         pass
                     else:
                         points += [seg.intersect(edge)[1]]
-             #orders the points
+            #remove repeats
+            points = list(set(points))
+            #orders the points
             if seg.point1[0] < seg.point2[0]:
                 #order by increasing x
                 points.sort(key=lambda tup: tup[0])
@@ -293,7 +282,7 @@ class polygon_set(object):
             elif seg.point1[1] < seg.point2[1]:
                 #order by increasing y
                 points.sort(key=lambda tup: tup[1])
-            elif seg.point1[1] > seg[1][1]:
+            elif seg.point1[1] > seg.point2[1]:
                 #order by decreasing y
                 points.sort(key=lambda tup: -tup[1])
         return points
@@ -311,7 +300,10 @@ class polygon_set(object):
         """
 
         if self.contains_point(seg.point1) and self.contains_point(seg.point2):
-            if(len(self.intersections_with(seg)) == 0):
+            intersections = self.intersections_with(seg)
+            if len(intersections) < 2:
+                return True
+            elif len(intersections) == 2 and (seg.point1 in intersections) and (seg.point1 in intersections):
                 return True
         return False
 
@@ -321,7 +313,7 @@ class polygon_set(object):
 
         Returns a boolean indicating wether point lies inside polygon
 
-        EXAMPES::
+        EXAMPLES::
             sage: p = polygon([[(-1,-1),(1,-1),(1,1),(-1,1)],[(1,1),(4,1),(3,2),(1,1)]])
             sage: polygon.contains((0,0))
 
@@ -392,8 +384,8 @@ class polygon_set(object):
         Returns a 4-tuple indicating the minimum bounding rectangle of the polygon
         in the form (min x, max x, min y, max y)
 
-        EXAMPES::
-            EXAMPES::
+        EXAMPLES::
+   
             sage: p = polygon([[(-1,-1),(1,0),(.5,.5)],[(1,1),(4,1),(3,2),(1,1)]])
             sage: p.bounding_rectangle()
 
@@ -469,10 +461,10 @@ class segment(object):
             return False
         else:
             dot = (self.point2[0]-self.point1[0])*(point[0]-self.point1[0]) + (self.point2[1]-self.point1[1])*(point[1]-self.point1[1])
-            abs1 = (self.point2[0]-self.point1[0])^2 + (self.point2[1]-self.point1[1])^2
-            abs2 = (point[0]-self.point1[0])^2 + (point[1]-self.point1[1])^2
-         
-            if dot^2 == abs1*abs2 and abs2/abs1 < 1 and abs2/abs1 >0:
+            abs1 = ((self.point2[0]-point[0])^2 + (self.point2[1]-point[1])^2)^(1/2)
+            abs2 = ((point[0]-self.point1[0])^2 + (point[1]-self.point1[1])^2)^(1/2)
+            abs3 = ((self.point2[0]- self.point1[0])^2 + (self.point2[1]-self.point1[1])^2)^(1/2)
+            if abs((abs1 + abs2) - abs3) < .00001:
                 return True
             else:
                 return False
