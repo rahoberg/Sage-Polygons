@@ -4,27 +4,41 @@ class polygon_set(object):
     def __init__(self,array,holes=[]):
         self.holes=self.set_corners(holes)
         self.corners = self.set_corners(array)
-        self.edges = self.set_edges(self.corners)
+        self.set_edges(self.corners)
 
     def set_edges(self,array):
-        #returns an array of arrays of edges for each sub polygon
+        r"""
+        Returns an array of arrays of edges for each sub polygon.
+        
+        EXAMPLES::
+            
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.edges
+            [[Segment: [(0, 1), (0, 0)], Segment: [(0, 0), (1, 0)], Segment: [(1, 0), (1, 1)], Segment: [(1, 1), (0, 1)]]]
+            sage: p = polygon_set([(0,0),(1,0),(0,1),(.5,.5),(2,1)])
+            sage: p.edges
+            [[Segment: [(0.666666666666667, 0.333333333333333), (0.666666666666667, 0.333333333333333)], Segment: [(0.666666666666667, 0.333333333333333), (0.500000000000000, 0.500000000000000)], Segment: [(0.500000000000000, 0.500000000000000), (2, 1)], Segment: [(2, 1), (0.666666666666667, 0.333333333333333)]], [Segment: [(0, 0), (0, 0)], Segment: [(0, 0), (1, 0)], Segment: [(1, 0), (0.666666666666667, 0.333333333333333)], Segment: [(0.666666666666667, 0.333333333333333), (0, 0)]]]
+
+        AUTHOR: 
+            Mary Solbrig       
+        """
+        #
         edges = []
         for polygon in self.corners:
             polygon_edges = []
-            for i in range(len(polygon)-1):
-                polygon_edges = polygon_edges + [segment(polygon[i],polygon[i+1])]
+            for i in range(len(polygon)):
+                polygon_edges = polygon_edges + [segment(polygon[i-1],polygon[i])]
             edges = edges + [polygon_edges]
-        return edges
+        self.edges = edges
 
     def graph(self,figsize=4,fill=False,axes=False,rgbcolor=(0,0,1),thickness=None,aspect_ration=1.0,legend_label=None,**options):
-        p=polygon2d(self.corners[0],fill=fill,axes=axes,figsize=figsize)
-        for vertices in self.corners[1:]:
+        corners=self.corners
+        if corners==[]:
+            return
+        p=polygon2d(corners[0],fill=fill,axes=axes,figsize=figsize)
+        for vertices in corners[1:]:
             p+=polygon2d(vertices,fill=fill,axes=axes,figsize=figsize)
         show(p)
-
-    def split_graph(self,figsize=3,axes=False,fill=False):
-        for vertices in self.corners:
-            show(polygon2d(vertices, fill=fill,axes=axes,figsize=figsize))
 
     def Colinear(self,segments):
         polygon=[]
@@ -48,24 +62,40 @@ class polygon_set(object):
                 polygon.append(segments[k].point1)
                 polygon.append(segments[k].point2)
                 k+=2
-        return polygon
+        if (polygon[-1] == polygon[0]):
+            return polygon[:-1]
+        else:
+            return polygon
       
 
-    #helper function for set_corners
-    #removes colinear points.
+    #initializes the array
 
     def set_corners(self,points):
+        r"""
+        EXAMPLES::
+            
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.corners
+                [[(0, 0), (1, 0), (1, 1), (0, 1)]]
+            
+            sage: p = polygon_set([(0,0),(1,0),(0,1),(.5,.5),(2,1)])
+            sage: p.corners
+            [[(0.666666666666667, 0.333333333333333), (0.500000000000000, 0.500000000000000), (2, 1), (0.666666666666667, 0.333333333333333)], [(0, 0), (1, 0), (0.666666666666667, 0.333333333333333), (0, 0)]]
+        AUTHOR:
+            Rebecca Hoberg
+        """
+        
         if points==[]:
-            return []
+            return [[]]
         try: 
             iter(points[0][0])
             vertices=points
         except TypeError:
             vertices=[points]
+        polygons=[]
         for array in vertices:
             array=self.pre_set_corners(array)
             segments=[]
-            polygons=[]
             length=len(array)
             if length<2:
                 return array
@@ -100,13 +130,10 @@ class polygon_set(object):
                 if stilladd:
                     segments.append(seg)
             polygons.append(self.Colinear(segments))
-            return polygons
+        return polygons
     
-#helper function for set_corners
-#removes colinear points.
 
-    #helper function for set_corners
-    #removes colinear points.
+    
     def pre_set_corners(self,array):
         vertices=[]
         length=len(array)
@@ -147,23 +174,77 @@ class polygon_set(object):
 
 
     def area(self):
+        r"""
+        EXAMPLES::
+            
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.area()
+            1
+            
+            sage: p = polygon_set([(0,0),(1,0),(0,1),(.5,.5),(2,1)])
+            sage: p.area()
+            0.250000000000000
+            
+
+        AUTHOR: 
+            Mary Solbrig       
+        """
         area = 0
         for polygon in self.corners:
-            for i in range(length(polygon)-1):
+            for i in range(len(polygon)-1):
                 area += polygon[i-1][0]*polygon[i][1] - polygon[i-1][1]*polygon[i][1]
         return(area/2)
 
     def perimeter(self):
+        r"""
+        EXAMPLES::
+            
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.area()
+            4
+            
+            sage: p = polygon_set([(0,0),(1,0),(0,1),(.5,.5),(2,1)])
+            sage: p.area
+            5.52431358877053
+            
+
+        AUTHOR: 
+            Mary Solbrig       
+        """
         perm = 0
-        for polygons in self.corners:
-            for i in range(len(polygon)):
-                perm += ((polygon[i][0]-polygon[i-1][0])^2+(polygon[i][1]-polygon[i-1][1])^2)^(1/2)
+        for polygon in self.edges:
+            for edge in polygon:
+                perm += edge.length()
+        return perm
 
-    def union(self, other):
-
-        pass
+    #def union(self, other):
+    #Will be very similar to intersection when it works
     
     def equal(self, p1, p2):
+        r"""
+        approximates equality in floating points
+        
+        EXAMPLES::
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.equal((0,0),(0.00000005,0.00000005))
+            True
+            
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.equal((0,0),(0.0000001,0.00000005))
+            False
+            
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.equal((0,0),(0.0000001,0.0000001))
+            False
+            
+            sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
+            sage: p.equal((0,0),(0.00000005,0.0000001))
+            False
+        
+        AUTHOR:
+            Mary Solbrig
+        """
+        
         epsilon = 0.0000001
         return (abs(p1[0] - p2[0]) < epsilon) and (abs(p1[1] - p2[1]) < epsilon)
 
@@ -175,7 +256,14 @@ class polygon_set(object):
             k = p.intersection(q)
             p.graph(axes = True)
             q.graph(axes = True)
-            k.graph()
+            k.graph(axes = True)
+            
+            p = polygon_set([[(-1,-1),(1,-1),(1,-.33),(.33,-.33),(.33,.33),(1,1),(-1,1)]])
+            q = polygon_set([[(.5,-2),(.5,2),(2,2),(2,-2)]])
+            k = p.intersection(q)
+            p.graph(axes = True)
+            q.graph(axes = True)
+            k.graph(axes = True)
         """
         
         edges_A = self.edges
@@ -237,11 +325,11 @@ class polygon_set(object):
                         new_edges.remove(edge)
             i += 1
             new_corners += [[]]
-        new_corners.pop(-1)                 
+        new_corners.pop(-1)     
         return(polygon_set(new_corners))
 
-    def set_difference(self, other):
-        pass
+    #def set_difference(self, other):
+    #    once union works, could be made from a combination of union and intersection.
 
     def intersections_with(self, seg):
         r"""
@@ -251,8 +339,26 @@ class polygon_set(object):
         !!!!!!Currently can't deal with co-linear segments.
 
         EXAMPLES:
-
-            insert examples, you lazy author.
+            
+            sage: p = polygon_set([(0,0),(0,1),(1,1),(1,0)])
+            sage: seg = segment((0,0),(1,1))
+            sage: p.intersections_with(seg)
+            [(0, 0), (1, 1)]
+            
+            sage: p = polygon_set([(0,0),(0,1),(1,1),(1,0)])
+            sage: seg = segment((.5,.5),(1,1))
+            sage: p.intersections_with(seg)
+            [(1, 1)]
+            
+            sage: p = polygon_set([(0,0),(0,1),(1,1),(1,0)])
+            sage: seg = segment((.5,.5),(.8,.8))
+            sage: p.intersections_with(seg)
+            []
+            
+            sage: p = polygon_set([[(-1,-1),(1,-1),(1,-.33),(.33,-.33),(.33,.33),(1,1),(-1,1)]])
+            sage: seg = segment((.5,-2),(.5,2))
+            sage: p.intersections_with(seg)
+            [(0.500000000000000, -1), (0.500000000000000, -33/100), (0.500000000000000, 1/2), (0.500000000000000, 1)]
 
         AUTHOR: Mary Solbrig
         """
@@ -290,7 +396,28 @@ class polygon_set(object):
 
         EXAMPLES:
 
-            insert examples, you lazy author.
+            sage: p = polygon_set([(0,0),(0,1),(1,1),(1,0)])
+            sage: seg = segment((0,0),(1,1))
+            sage: print p.contains_line(seg)
+            True
+            
+            sage: p = polygon_set([(0,0),(0,1),(1,1),(1,0)])
+            sage: seg = segment((.5,.5),(1,1))
+            sage: print p.contains_line(seg)
+            True
+
+            sage: p = polygon_set([(0,0),(0,1),(1,1),(1,0)])
+            sage: seg = segment((.5,.5),(.8,.8))
+            sage: print p.contains_line(seg)
+            True
+            
+            sage: p = polygon_set([[(-1,-1),(1,-1),(1,-.33),(.33,-.33),(.33,.33),(1,1),(-1,1)]])
+            sage: seg = segment((.5,-2),(.5,2))
+            sage: print p.contains_line(seg)
+
+            sage: p = polygon_set([[(-1,-1),(1,-1),(1,-.33),(.33,-.33),(.33,.33),(1,1),(-1,1)]])
+            sage: seg = segment((.5,-.5),(.5,.5))
+            sage: print p.contains_line(seg)
 
         AUTHOR: Mary Solbrig
         """
@@ -301,7 +428,10 @@ class polygon_set(object):
                 return True
             elif len(intersections) == 2 and (seg.point1 in intersections) and (seg.point1 in intersections):
                 return True
-        return False
+            else:
+                return False
+        else:
+            return False
 
 
     def contains_point(self, point):
@@ -401,13 +531,6 @@ class polygon_set(object):
                 min_y = min(coordinate[1],min_y)
                 max_y = max(coordinate[1],max_y)
         return((min_x,max_x,min_y,max_y))
-
-    def contains(self, polygon):
-        pass
-    def contiguous(self):
-        pass
-    def convex(self):
-        pass
         
 class segment(object):
     def __init__(self,point1,point2):
