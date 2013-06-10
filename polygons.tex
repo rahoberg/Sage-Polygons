@@ -46,7 +46,7 @@ We will implement various algorithms on polygons (not necessarily convex).
 The user will input an ordered list of vertices, or a list of such lists, and our program then initializes a corresponding list of polygons.
 If the vertices the user gives have adjacent colinear points, these will be removed, and if they have self-intersections, more than one polygon may be created. 
 The user also has the option to specify holes inside the polygons.
-Functions we will create include contains (whether a point or polygon is contained in a polygon) intersection of two polygons, and union of two polygons.
+Functions we will create include contains (whether a point or polygon is contained in a polygon) intersection of two polygons. 
 
 \end{abstract}
 
@@ -56,9 +56,9 @@ Functions we will create include contains (whether a point or polygon is contain
 
 \section{Segment Class}
 
-In order to work more easily with polygons, we first created a class called segment. This is a very simple class with only two attributes (its two endpoints) and one function, intersect.
-The call intersect(segment1,segment2) returns (True, point) if the two segments intersect at a point (including possibly the endpoints), and (False, None) if they do not intersect.
+In order to work more easily with polygons, we first created a class called segment. In this class is the function intersect. The call intersect(segment1,segment2) returns (True, point) if the two segments intersect at a point (including possibly the endpoints), and (False, None) if they do not intersect.
 If their intersection is in fact a line segment, it returns (True, None).
+The segment class also has contains, which determines whether a point is contained in the segment, and length.
 
 \section{Polygons Class}
 The class polygon\_set that we implemented has a list of polygons called corners, where each polygon in the list is a list of vertices that ends with its starting vertex. 
@@ -76,7 +76,6 @@ $[[a,b,e,f,a], [c,e,d,c]]. $
 The class polygon\_set will also have the following functions:
 
 \begin{enumerate}
-\item{Union }
 \item{Intersection}
 \item{Area}
 \item{Contains}
@@ -95,7 +94,7 @@ The initialization of polygons calls the function set\_corners, which does the f
 IMPORTANT: If the list of vertices the user gives would yield interior line segments, our code will (at best) fail loudly, and (at worst) fail silently. For example, a star will fail. Hopefully will fix this by tomorrow, but may not get around to it.
 
 \section{What is currently in Sage}
-Sage currently has some polygon capabilities, but most of it is done in much greater generality, considering polyhedra in n dimensions. While we were able to find the simple area function, we weren't able to find union and intersection and it only deals with convex polygons. Our code allows the user to compute the area of much more general 2-D polygons, and also allows the computation of union and intersection.
+Sage currently has some polygon capabilities, but most of it is done in much greater generality, considering polyhedra in n dimensions. While we were able to find the simple area function, we weren't able to find union and intersection and it only deals with convex polygons. Our code allows the user to compute the area of much more general 2-D polygons, and also allows the computation of intersection. Union of two polygons would also be fairly simple to create, as it would be fairly similar to intersection.
 
 An alternative Sage object, polygon2d, allows for arbitrary polygons, even allowing for self-intersections, but all it does is graph. Our code uses this object to be able to graph, but it also allows for computation of intersection, union, and more.
 
