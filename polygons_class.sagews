@@ -6,6 +6,11 @@ class polygon_set(object):
         self.corners = self.set_corners(array)
         self.set_edges(self.corners)
 
+    def __repr__(self):
+        str=repr(len(self.corners))
+        str+=" Polygons. Type <polygon>.corners to see corners."
+        return str
+        
     def set_edges(self,array):
         r"""
         Returns an array of arrays of edges for each sub polygon.
@@ -72,7 +77,23 @@ class polygon_set(object):
 
     def set_corners(self,points):
         r"""
+         r"""
+        Takes a list of vertices (or a list of lists) and 
+        returns a list of polygons (represented as lists of vertices) 
+        without colinear points.
+        If the segments of the polygons intersect, more than one polygon may be created from a single list.
+        To be improved:
+        Colinear line segments that intersect in segments will fail.  For example, 
+            [(0,0),(1,0),(0,1),(0,0),(-1,0),(0,1)] will fail.
+        Also, internal line segments will fail. For example, a star will fail.
+        Now for some examples that work...
+
         EXAMPLES::
+            sage: p=polygon_set([])
+            sage: p.set_corners([[(0,0),(1,0),(0,1),(.5,.5),(2,1)]])
+            [[(0.666666666666667, 0.333333333333333), (0.500000000000000,0.500000000000000), (2, 1)], [(0, 0), (1, 0),(0.666666666666667,0.333333333333333)]]
+            sage: p.set_corners([(0,0),(1,1),(0,1),(1,0)])
+            [[(1/2, 1/2), (1, 1), (0, 1)], [(0, 0), (1/2, 1/2), (1, 0)]]
             
             sage: p = polygon_set([(0,0),(1,0),(1,1),(0,1)])
             sage: p.corners
@@ -81,6 +102,7 @@ class polygon_set(object):
             sage: p = polygon_set([(0,0),(1,0),(0,1),(.5,.5),(2,1)])
             sage: p.corners
             [[(0.666666666666667, 0.333333333333333), (0.500000000000000, 0.500000000000000), (2, 1), (0.666666666666667, 0.333333333333333)], [(0, 0), (1, 0), (0.666666666666667, 0.333333333333333), (0, 0)]]
+
         AUTHOR:
             Rebecca Hoberg
         """
@@ -135,7 +157,19 @@ class polygon_set(object):
 
     
     def pre_set_corners(self,array):
-        vertices=[]
+        r"""
+        Takes a list of vertices (or list of lists) and returns a list of polygons without duplicate points
+
+        EXAMPLES::
+            
+        sage: p=polygon_set([])
+        sage: p.pre_set_corners([(0,0),(1,0),(0,1)])
+        [(0,0),(1,0),(0,1)]
+        
+        AUTHOR: Rebecca Hoberg
+        """
+        
+    vertices=[]
         length=len(array)
         k=0
         while k<length:
