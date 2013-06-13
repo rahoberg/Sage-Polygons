@@ -77,7 +77,6 @@ class polygon_set(object):
 
     def set_corners(self,points):
         r"""
-         r"""
         Takes a list of vertices (or a list of lists) and 
         returns a list of polygons (represented as lists of vertices) 
         without colinear points.
